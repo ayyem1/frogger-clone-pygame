@@ -1,6 +1,7 @@
-from os import path, walk
 
 import pygame
+
+from engine.assets import load_assets
 
 
 class Player(pygame.sprite.Sprite):
@@ -9,21 +10,25 @@ class Player(pygame.sprite.Sprite):
     put it in our engine code
     """
 
-    MOVE_RIGHT_STATUS: str = "right"
-    MOVE_LEFT_STATUS: str = "left"
-    MOVE_UP_STATUS: str = "up"
-    MOVE_DOWN_STATUS: str = "down"
+    MOVE_RIGHT: str = "right"
+    MOVE_LEFT: str = "left"
+    MOVE_UP: str = "up"
+    MOVE_DOWN: str = "down"
 
     def __init__(self, pos: tuple[int, int], *groups) -> None:
         super().__init__(*groups)
 
-        self.animations: dict[str, list[pygame.Surface]] = {}
-        self.status = self.MOVE_DOWN_STATUS
+        self.animations: dict[str, list[pygame.Surface]] = {
+            self.MOVE_RIGHT: load_assets("data/graphics/player/right"),
+            self.MOVE_LEFT: load_assets("data/graphics/player/left"),
+            self.MOVE_UP: load_assets("data/graphics/player/up"),
+            self.MOVE_DOWN: load_assets("data/graphics/player/down"),
+        }
+        self.action = self.MOVE_DOWN
         self.current_frame: float = 0.0
         self.animation_speed: float = 10.0
 
-        self.import_assets()
-        self.image = self.animations[self.status][int(self.current_frame)]
+        self.image = self.animations[self.action][int(self.current_frame)]
 
         self.rect = self.image.get_rect(center=pos)
         self.position = pygame.math.Vector2(self.rect.center)
@@ -31,19 +36,6 @@ class Player(pygame.sprite.Sprite):
         self.direction = pygame.math.Vector2()
         self.speed: float = 200.0
 
-    def import_assets(self):
-        for index, content in enumerate(walk("data/graphics/player")):
-            if index == 0:
-                for folder_name in content[1]:  # Second arg in tuple is list of folder names
-                    self.animations[folder_name] = []
-            else:
-                for filename in sorted(content[2]):
-                    filepath = path.normpath(path.join((content[0]), filename))
-                    key = path.split(content[0])[1]  # Second element is name of the parent folder
-                    if path.exists(filepath):
-                        self.animations[key].append(pygame.image.load(filepath))
-                    else:
-                        print(f"Failed to find path for player animation. path={filepath}")
 
     def update(self, dt: float):
         self.handle_input()
@@ -62,13 +54,13 @@ class Player(pygame.sprite.Sprite):
             self.direction.normalize_ip()
 
         if self.direction.y > 0:
-            self.status = self.MOVE_DOWN_STATUS
+            self.action = self.MOVE_DOWN
         elif self.direction.y < 0:
-            self.status = self.MOVE_UP_STATUS
+            self.action = self.MOVE_UP
         elif self.direction.x > 0:
-            self.status = self.MOVE_RIGHT_STATUS
+            self.action = self.MOVE_RIGHT
         elif self.direction.x < 0:
-            self.status = self.MOVE_LEFT_STATUS
+            self.action = self.MOVE_LEFT
 
     def handle_movement(self, dt: float):
         self.position += self.direction * self.speed * dt
@@ -79,7 +71,7 @@ class Player(pygame.sprite.Sprite):
             self.current_frame = 0.0
         else:
             self.current_frame += self.animation_speed * dt
-            if self.current_frame >= len(self.animations[self.status]):
+            if self.current_frame >= len(self.animations[self.action]):
                 self.current_frame = 0.0
 
-        self.image = self.animations[self.status][int(self.current_frame)]
+        self.image = self.animations[self.action][int(self.current_frame)]
