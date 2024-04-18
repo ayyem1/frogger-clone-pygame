@@ -37,7 +37,7 @@ class Player(pygame.sprite.Sprite):
                 for folder_name in content[1]:  # Second arg in tuple is list of folder names
                     self.animations[folder_name] = []
             else:
-                for filename in content[2]:
+                for filename in sorted(content[2]):
                     filepath = path.normpath(path.join((content[0]), filename))
                     key = path.split(content[0])[1]  # Second element is name of the parent folder
                     if path.exists(filepath):
