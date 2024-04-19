@@ -2,6 +2,7 @@ import sys
 
 import pygame
 
+from engine.assets import AssetDatabase
 from engine.debug import display_fps
 from engine.events import EventSystem
 from game.game_events import GameEvents
@@ -17,6 +18,17 @@ class Game:
         # Init window
         pygame.display.set_caption(GAME_NAME)
         self.display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+
+        AssetDatabase().load_animation_assets(
+            key="player_right", base_path="data/graphics/player/right", convert_alpha=True
+        )
+        AssetDatabase().load_animation_assets(
+            key="player_left", base_path="data/graphics/player/left", convert_alpha=True
+        )
+        AssetDatabase().load_animation_assets(key="player_up", base_path="data/graphics/player/up", convert_alpha=True)
+        AssetDatabase().load_animation_assets(
+            key="player_down", base_path="data/graphics/player/down", convert_alpha=True
+        )
 
         # Init clock
         self.clock = pygame.time.Clock()

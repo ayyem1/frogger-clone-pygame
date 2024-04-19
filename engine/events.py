@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Self, Union
+from typing import Self
 
 import pygame
 
@@ -13,7 +13,7 @@ class CustomEventType(Enum):
     pass
 
 
-class EventSystem(object):
+class EventSystem:
     """
     We reserve a slot in Pygame's event system for our game's custom events.
     Anything listening to events can use this slot by referencing
@@ -24,12 +24,12 @@ class EventSystem(object):
 
     user_event_slot: int
 
-    _instance: Union[Self, None] = None
+    _instance: Self | None = None
     _custom_events: dict[CustomEventType, pygame.event.Event] = {}
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(EventSystem, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
             cls._instance.user_event_slot = pygame.event.custom_type()
 
         return cls._instance
@@ -55,9 +55,7 @@ class EventSystem(object):
             self.user_event_slot, kwargs
         )
 
-    def get_custom_event(
-        self, custom_event_type: CustomEventType
-    ) -> Union[pygame.event.Event, None]:
+    def get_custom_event(self, custom_event_type: CustomEventType) -> pygame.event.Event | None:
         if custom_event_type not in self._custom_events:
             return None
 

@@ -1,7 +1,6 @@
-
 import pygame
 
-from engine.assets import load_assets
+from engine.assets import AssetDatabase
 
 
 class Player(pygame.sprite.Sprite):
@@ -10,25 +9,20 @@ class Player(pygame.sprite.Sprite):
     put it in our engine code
     """
 
-    MOVE_RIGHT: str = "right"
-    MOVE_LEFT: str = "left"
-    MOVE_UP: str = "up"
-    MOVE_DOWN: str = "down"
+    MOVE_RIGHT: str = "player_right"
+    MOVE_LEFT: str = "player_left"
+    MOVE_UP: str = "player_up"
+    MOVE_DOWN: str = "player_down"
 
     def __init__(self, pos: tuple[int, int], *groups) -> None:
         super().__init__(*groups)
 
-        self.animations: dict[str, list[pygame.Surface]] = {
-            self.MOVE_RIGHT: load_assets("data/graphics/player/right"),
-            self.MOVE_LEFT: load_assets("data/graphics/player/left"),
-            self.MOVE_UP: load_assets("data/graphics/player/up"),
-            self.MOVE_DOWN: load_assets("data/graphics/player/down"),
-        }
-        self.action = self.MOVE_DOWN
+        self.action: str = ""
+        self.set_action(self.MOVE_DOWN)
+
         self.current_frame: float = 0.0
         self.animation_speed: float = 10.0
-
-        self.image = self.animations[self.action][int(self.current_frame)]
+        self.image = self.animations[int(self.current_frame)]
 
         self.rect = self.image.get_rect(center=pos)
         self.position = pygame.math.Vector2(self.rect.center)
@@ -36,11 +30,14 @@ class Player(pygame.sprite.Sprite):
         self.direction = pygame.math.Vector2()
         self.speed: float = 200.0
 
+    def set_action(self, action: str):
+        if action != self.action:
+            self.action = action
+            self.animations = AssetDatabase().get_asset(f"{self.action}")
 
     def update(self, dt: float):
         self.handle_input()
         self.handle_movement(dt=dt)
-        # if self.check_animation_time():
         self.animate(dt=dt)
 
     def handle_input(self):
@@ -54,13 +51,13 @@ class Player(pygame.sprite.Sprite):
             self.direction.normalize_ip()
 
         if self.direction.y > 0:
-            self.action = self.MOVE_DOWN
+            self.set_action(self.MOVE_DOWN)
         elif self.direction.y < 0:
-            self.action = self.MOVE_UP
+            self.set_action(self.MOVE_UP)
         elif self.direction.x > 0:
-            self.action = self.MOVE_RIGHT
+            self.set_action(self.MOVE_RIGHT)
         elif self.direction.x < 0:
-            self.action = self.MOVE_LEFT
+            self.set_action(self.MOVE_LEFT)
 
     def handle_movement(self, dt: float):
         self.position += self.direction * self.speed * dt
@@ -71,7 +68,7 @@ class Player(pygame.sprite.Sprite):
             self.current_frame = 0.0
         else:
             self.current_frame += self.animation_speed * dt
-            if self.current_frame >= len(self.animations[self.action]):
+            if self.current_frame >= len(self.animations):
                 self.current_frame = 0.0
 
-        self.image = self.animations[self.action][int(self.current_frame)]
+        self.image = self.animations[int(self.current_frame)]
