@@ -59,7 +59,7 @@ class Game:
             display_fps(self.clock, WINDOW_WIDTH)
             self.entity_group.draw(self.display_surface)
 
-            pygame.display.update()
+            pygame.display.flip()
 
 
 if __name__ == "__main__":

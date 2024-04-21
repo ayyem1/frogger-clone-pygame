@@ -44,7 +44,6 @@ class AssetDatabase:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance.user_event_slot = pygame.event.custom_type()
 
         return cls._instance
 
